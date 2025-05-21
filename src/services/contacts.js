@@ -9,6 +9,20 @@ export const getAllContacts = async () => {
 export const getContactById = async (contactId) => {
   const contact = await Contact.findById(contactId);
   console.log(contactId);
-
   return contact;
+};
+
+export const createContact = (contact) => {
+  console.log(contact);
+  return Contact.create(contact);
+};
+
+export const updateContact = (contactId, contact) => {
+  console.log(contactId);
+  return Contact.findByIdAndUpdate(contactId, contact, { new: true });
+};
+
+export const deleteContact = (contactId) => {
+  console.log(contactId);
+  return Contact.findByIdAndDelete(contactId);
 };
