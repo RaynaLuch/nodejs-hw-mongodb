@@ -12,11 +12,13 @@ import { parseSortParams } from '../utils/parseSortParams.js';
 export const getAllContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
+  const userId = req.user._id;
   const contacts = await getAllContacts({
     page,
     perPage,
     sortBy,
     sortOrder,
+    userId,
   });
   res.status(200).json({
     status: 200,
@@ -27,7 +29,8 @@ export const getAllContactsController = async (req, res) => {
 
 export const getContactByIdController = async (req, res) => {
   const { contactId } = req.params;
-  const contact = await getContactById(contactId);
+  const userId = req.user._id;
+  const contact = await getContactById(contactId, userId);
 
   // Відповідь, якщо контакт не знайдено
   if (!contact) {
@@ -42,7 +45,9 @@ export const getContactByIdController = async (req, res) => {
 };
 
 export const createContactController = async (req, res) => {
-  const contact = await createContact(req.body);
+  const contactBody = req.body;
+  contactBody.userId = req.user._id;
+  const contact = await createContact(contactBody);
 
   res.status(201).json({
     status: 201,
@@ -53,9 +58,10 @@ export const createContactController = async (req, res) => {
 
 export const updateContactController = async (req, res) => {
   const { contactId } = req.params;
-  const contact = await updateContact(contactId, req.body);
+  const userId = req.user._id;
+  const contact = await updateContact(contactId, userId, req.body);
 
-  if (!contact) {
+  if (!contact.length) {
     throw createHttpError(404, 'Contact not found');
   }
   res.status(200).json({
@@ -67,8 +73,9 @@ export const updateContactController = async (req, res) => {
 
 export const deleteContactController = async (req, res) => {
   const { contactId } = req.params;
+  const userId = req.user._id;
 
-  const contact = await deleteContact(contactId);
+  const contact = await deleteContact(contactId, userId);
 
   if (!contact) {
     throw createHttpError(404, 'Contact not found');
