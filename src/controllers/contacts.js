@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import {
   getAllContacts,
   getContactById,
@@ -8,6 +9,7 @@ import {
 import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 
 export const getAllContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -47,6 +49,11 @@ export const getContactByIdController = async (req, res) => {
 export const createContactController = async (req, res) => {
   const contactBody = req.body;
   contactBody.userId = req.user._id;
+
+  const result = await uploadToCloudinary(req.file.path);
+  await fs.unlink(req.file.path);
+  contactBody.photo = result.secure_url;
+
   const contact = await createContact(contactBody);
 
   res.status(201).json({
@@ -59,7 +66,15 @@ export const createContactController = async (req, res) => {
 export const updateContactController = async (req, res) => {
   const { contactId } = req.params;
   const userId = req.user._id;
-  const contact = await updateContact(contactId, userId, req.body);
+  const contactBody = req.body;
+
+  if (req.file) {
+    const result = await uploadToCloudinary(req.file.path);
+    await fs.unlink(req.file.path);
+    contactBody.photo = result.secure_url;
+  }
+
+  const contact = await updateContact(contactId, userId, contactBody);
 
   if (!contact) {
     throw createHttpError(404, 'Contact not found');

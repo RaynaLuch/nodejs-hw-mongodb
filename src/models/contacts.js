@@ -6,6 +6,10 @@ const contactSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    photo: {
+      type: String,
+      required: false,
+    },
     phoneNumber: {
       type: String,
       required: true,

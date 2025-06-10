@@ -7,6 +7,7 @@ export const contactSchema = Joi.object({
   email: Joi.string(),
   isFavourite: Joi.boolean(),
   contactType: Joi.string().valid('work', 'home', 'personal').required(),
+  //photo: Joi.string().empty(),
   // userId: Joi.string().custom((value, helper) => {
   //   if (value && !isValidObjectId(value)) {
   //     return helper.message('User id should be a valid mongo id');
